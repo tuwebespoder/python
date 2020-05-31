@@ -1,0 +1,57 @@
+  ## Importar los archivos que tengo en la carpeta:
+import pandas as pd
+import time
+import os
+archivos = os.listdir()
+archivos
+
+  ##Version 1: "Function"
+        #Como ejemplo voy a analizar el German30 (creando un archivo German30_Py.csv)
+        #Voy a abrir el archivo cada minuto y guardar los datos en una lista
+    #Creo variables 
+up = []
+down = []
+index = []
+minute =[]
+
+    #Creo enunciado y lo guardo en un archivo nuevo
+enunciado = ["Index","Hora", "Up","Down","vol","T","ATR","Trade" ]
+file = open("German30_Py.csv","a")
+for i in range(0,len(enunciado)):
+    file.write(enunciado[i] + ",")
+file.write("\n")
+file.close()
+  
+  #Guardo los datos cada minuto durante 24 horas
+for i in range(60*24):
+        #Inicialmente abro el archivo que me crea el indicador del MT (GP_XXX):
+          #voy a copiar GP_ los valores de down y up respecto el tiempo
+    file = open(archivos[4],"r") #Cojo GERman30 y guardo los datos cada min
+    content = file.read()
+    file.close()
+    date = content.split("\n")[3].split(" ")[1]
+    up.append(content.split("\n")[4].split(" ")[1])
+    down.append(content.split("\n")[5].split(" ")[1])
+    index.append(i) 
+    
+        #Despues abro el archivo que me crea el indicador del MT (WH_XXX):
+    file = open("WH_GERMAN30_5min.csv","r") #Cojo GERman30 y guardo los datos cada min
+    content = file.read()
+    file.close()
+    #content.split("\n")[x] x = vol = 5, T =6, ATR = 7, Trade = 8
+                #Alternativa a lo anterior: Aqui no creo una lista sino que las guardo en variables 
+                ##(despues importaré los datos en un df si quiero analizarlos)
+    vol= content.split("\n")[5].split(" ")[1]
+    T = content.split("\n")[6].split(" ")[1]
+    ATR = content.split("\n")[7].split(" ")[1]
+    Trade = content.split("\n")[8]
+    
+        #guardo los datos en un archivo
+    file = open("German30_Py.csv","a")
+    file.write(str(index[i]) + "," + date + "," + str(up[i]) + "," + str(down[i]) + "," + vol +"," + T +"," + ATR +"," + Trade+ "\n")
+    file.close()
+    time.sleep(60)
+        
+print("se acabaron dos horas de datos")
+
+################
