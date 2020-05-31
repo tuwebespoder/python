@@ -1,0 +1,59 @@
+## Programa diseñado para escribir las referencias de revistas (usando ficheros .ris) en formato:
+## Nom1. apellido1, Nom2. apellido2, Nom3. apellido3, Titulo de la publicación, Revista., Año, volumen, páginas.
+
+#Ejemplo: para abrir un archivo "1.ris"
+archivo = "1"
+  #Leo el contenido:
+file = open(archivo+".ris","r",encoding="UTF-8")
+data = file.read()
+file.close()
+
+  #Elimino espacios al inicio y final del texto
+data = data.strip()
+
+  #Creo un diccionario (refer) con las llaves que quiero guardar:T1,AU,JO,Y,SP,EP, VL, (IS), M3
+      #Importante: Algunas revistas tienen diferentes llaves: autores pueden ser AU o A1 (Excepciones en el siguiente apartado)
+refer={}
+keys= ["T1","AU","JO","PY","SP","EP","VL","M3"]
+for key in keys:
+    refer[key]=[]
+
+  #Lleno el dictionario con los valores correspondientes:
+for line in range(0,len(data.split("\n"))):
+    #Relleno el valor cuando aparece la Key segun los primeros dos caracteres
+    if data.split("\n")[line][:2] in keys:
+        #La info que quiero guardar siempre aparece a partir de 6
+        refer[data.split("\n")[line][:2]].append(data.split("\n")[line][6:])
+    #Excepcion 1: Si no tiene Y y tiene "PY"
+    if data.split("\n")[line][:2] == "Y1":
+        # Tendré dos items en caso de tener PY y Y1 pero da igual porque más adelante cojeré el item [0]
+        refer["PY"].append(data.split("\n")[line][6:10])  
+    #Excepcion 2: Si no tiene Au y tiene "A1"
+    if data.split("\n")[line][:2] == "A1":
+        refer["AU"].append(data.split("\n")[line][6:])
+    #Excepcion 3: Si no tiene T1 y tiene "TI"
+    if data.split("\n")[line][:2] == "TI":
+        refer["T1"].append(data.split("\n")[line][6:])
+        
+  #Escribir referencia: primero los autores
+referencia=""
+for autores in range(0,len(refer["AU"])):
+            #No me hace falta separar entre autores con 1 o mas apellidos
+    nombre=refer["AU"][autores].split(",")[1].strip().split(" ")[0]
+    apellido1=refer["AU"][autores].split(",")[1].split(" ")[2:]
+    apellido2=refer["AU"][autores].split(",")[0].strip()
+                 #1Problema: gente con mas de un 1er apellido i. e. 6 or 2
+    apel1=""
+    for i in range(0,len(apellido1)): #paso una lista a un string
+        apel1 += apellido1[i] +" "
+    referencia += nombre[0] + ". "+ apel1 + apellido2 +", "
+
+  #Escribir el resto de la referencia: titulo,revista,year,volu,sp,ep
+for keys in ["T1","JO","PY","VL","SP","EP"]:
+    if len(refer[keys])>0:
+        if keys == "SP":
+            referencia += "<b>" + refer[keys][0] +"</b>"+"-"
+        else:
+            referencia += refer[keys][0] + ", "
+
+referencia
